@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class MyTimerWidget extends StatefulWidget {
-  const MyTimerWidget({super.key});
+  final bool onPlayPauseToggle;
+
+  const MyTimerWidget({
+    Key? key,
+    required this.onPlayPauseToggle,
+  }) : super(key: key);
 
   @override
   _MyTimerWidgetState createState() => _MyTimerWidgetState();
 }
 
 class _MyTimerWidgetState extends State<MyTimerWidget> {
+  bool isPlaying = false;
   int secondsElapsed = 0;
   late Timer timer;
 
@@ -25,10 +31,21 @@ class _MyTimerWidgetState extends State<MyTimerWidget> {
   }
 
   void startTimer() {
-    timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
-      setState(() {
-        secondsElapsed++;
-      });
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      if (widget.onPlayPauseToggle) {
+        setState(() {
+          isPlaying = !isPlaying;
+          if (isPlaying) {
+            secondsElapsed++;
+          }
+        });
+      }
+    });
+  }
+
+  void resetTimer() {
+    setState(() {
+      secondsElapsed = 0;
     });
   }
 
@@ -46,13 +63,17 @@ class _MyTimerWidgetState extends State<MyTimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.topCenter,
-      padding: const EdgeInsets.only(top: 16.0),
-      child: Text(
-        formatTime(secondsElapsed),
-        style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-      ),
+    return Column(
+      children: [
+        Container(
+          alignment: Alignment.topCenter,
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Text(
+            formatTime(secondsElapsed),
+            style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
     );
   }
 }

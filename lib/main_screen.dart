@@ -27,6 +27,7 @@ class _MainGameState extends State<MainGame>
   int elapsedTime = 0;
   double blueCircleSpeedIncrease = 0.1; // 10%
   double maxBlueCircleSpeedIncrease = 3.0; // 최대 5배 증가
+  bool isPlay = false; // 추가된 전역 변수
 
   @override
   void initState() {
@@ -53,28 +54,32 @@ class _MainGameState extends State<MainGame>
       blueCircleVelocities
           .add(Offset(random.nextDouble() * 10, random.nextDouble() * 10));
     }
-    // 타이머 시작
-    startTimer();
   }
 
-  void startTimer() {
+  void accelerateBlueCircleSpeed() {
     const duration = Duration(seconds: 10);
     Timer.periodic(duration, (timer) {
-      setState(() {
-        elapsedTime++;
-        // 10초마다 파란색 원들의 속도를 1%씩 증가
-        if (elapsedTime % 10 == 0 &&
-            blueCircleSpeedIncrease < maxBlueCircleSpeedIncrease) {
-          for (int i = 0; i < blueCircleVelocities.length; i++) {
-            blueCircleVelocities[i] *= (1.1); // 1% 증가
+      if (isPlay) {
+        setState(() {
+          elapsedTime++;
+          // 10초마다 파란색 원들의 속도를 1%씩 증가
+          if (elapsedTime % 10 == 0 &&
+              blueCircleSpeedIncrease < maxBlueCircleSpeedIncrease) {
+            for (int i = 0; i < blueCircleVelocities.length; i++) {
+              blueCircleVelocities[i] *= 1.2; // 1% 증가
+            }
+            blueCircleSpeedIncrease *= 2.0; // 최대속도
           }
-          blueCircleSpeedIncrease *= 2.0; // 최대속도
-        }
-      });
+        });
+      }
     });
   }
 
   void moveBlueCircles() {
+    if (!isPlay) {
+      return; // isPlay가 false일 경우 움직임을 멈춥니다.
+    }
+
     // 초록색 원과 파란색 원들의 중심 사이의 거리 계산
     double greenCircleCenterX = centerX + offsetX;
     double greenCircleCenterY = centerY + offsetY;
@@ -110,15 +115,27 @@ class _MainGameState extends State<MainGame>
         double newY = blueCircleCenterY + dy;
 
         // 화면 범위를 벗어나면 방향을 바꿈
-        if (newX < 20 || newX > MediaQuery.of(context).size.width - 20) {
+        if (newX < 20 || newX > MediaQuery
+            .of(context)
+            .size
+            .width - 20) {
           dx = -dx;
         }
-        if (newY < 20 || newY > MediaQuery.of(context).size.height - 20) {
+        if (newY < 20 || newY > MediaQuery
+            .of(context)
+            .size
+            .height - 20) {
           dy = -dy;
         }
 
-        newX = max(20, min(newX, MediaQuery.of(context).size.width - 20));
-        newY = max(20, min(newY, MediaQuery.of(context).size.height - 20));
+        newX = max(20, min(newX, MediaQuery
+            .of(context)
+            .size
+            .width - 20));
+        newY = max(20, min(newY, MediaQuery
+            .of(context)
+            .size
+            .height - 20));
 
         blueCirclePositions[i] = Offset(newX, newY);
         blueCircleVelocities[i] = Offset(dx, dy);
@@ -134,14 +151,19 @@ class _MainGameState extends State<MainGame>
 
   @override
   Widget build(BuildContext context) {
-    centerX = MediaQuery.of(context).size.width / 2 - 50;
-    centerY = MediaQuery.of(context).size.height / 2 - 50;
+    centerX = MediaQuery
+        .of(context)
+        .size
+        .width / 2 - 50;
+    centerY = MediaQuery
+        .of(context)
+        .size
+        .height / 2 - 50;
 
     return Scaffold(
       body: Stack(
         children: [
-          // MainPopup(), // MainPopup 위젯으로 대체
-          const MyTimerWidget(),
+          MyTimerWidget(onPlayPauseToggle: isPlay,),
           AnimatedBuilder(
             animation: _animation,
             builder: (BuildContext context, Widget? child) {
@@ -154,14 +176,14 @@ class _MainGameState extends State<MainGame>
                     shape: BoxShape.circle,
                     gradient: isColliding && _animation.value != 0.0
                         ? RadialGradient(
-                            colors: const [
-                              Colors.green,
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 1.0],
-                            center: const Alignment(0.5, 0.5),
-                            radius: _animation.value * 1.5,
-                          )
+                      colors: const [
+                        Colors.green,
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 1.0],
+                      center: const Alignment(0.5, 0.5),
+                      radius: _animation.value * 1.5,
+                    )
                         : null,
                   ),
                   width: 50,
@@ -172,30 +194,43 @@ class _MainGameState extends State<MainGame>
           ),
           Stack(
             children: blueCirclePositions
-                .map((position) => Positioned(
-                      left: position.dx,
-                      top: position.dy,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          shape: BoxShape.circle,
-                          gradient: isColliding && position == collisionPosition
-                              ? RadialGradient(
-                                  colors: const [
-                                    Colors.blue,
-                                    Colors.transparent,
-                                  ],
-                                  stops: const [0.0, 1.0],
-                                  center: const Alignment(0.5, 0.5),
-                                  radius: _animation.value * 1.5,
-                                )
-                              : null,
-                        ),
-                        width: 20,
-                        height: 20,
-                      ),
-                    ))
+                .map((position) =>
+                Positioned(
+                  left: position.dx,
+                  top: position.dy,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                      gradient: isColliding && position == collisionPosition
+                          ? RadialGradient(
+                        colors: const [
+                          Colors.blue,
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 1.0],
+                        center: const Alignment(0.5, 0.5),
+                        radius: _animation.value * 1.5,
+                      )
+                          : null,
+                    ),
+                    width: 20,
+                    height: 20,
+                  ),
+                ))
                 .toList(),
+          ),
+          Positioned(
+            top: 20,
+            right: 20,
+            child: IconButton(
+              icon: Icon(isPlay ? Icons.pause : Icons.play_arrow , color: Colors.red,),
+              onPressed: () {
+                setState(() {
+                  isPlay = !isPlay;
+                });
+              },
+            ),
           ),
         ],
       ),
