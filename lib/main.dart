@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:roulette_game/title_screen.dart';
 
 import 'main_screen.dart';
 
@@ -19,13 +19,16 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.landscapeRight,
     ]);
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // 디버그 레이블 비활성화
-      title: '공 피하기',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MainGame(),
-    );
+        debugShowCheckedModeBanner: false, // 디버그 레이블 비활성화
+        title: '공 피하기',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const Scaffold(
+            body: Stack(
+          children: [
+            TitleScreen(),
+          ],
+        )));
   }
 }
-
