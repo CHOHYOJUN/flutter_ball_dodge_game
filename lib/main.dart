@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:roulette_game/reset_widget.dart';
 import 'package:roulette_game/title_screen.dart';
 
-import 'main_screen.dart';
 
 void main() {
   runApp(const MyApp());
