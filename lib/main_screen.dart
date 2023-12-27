@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:roulette_game/reset_widget.dart';
 
 import 'dart:async';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:math';
-import 'my_timer_widget.dart';
+import 'timer_widget.dart';
 
 class MainGame extends StatefulWidget {
   const MainGame({Key? key}) : super(key: key);
@@ -38,11 +39,13 @@ class _MainGameState extends State<MainGame>
     );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        offsetX = event.y * 20;
-        offsetY = event.x * 20;
-        moveBlueCircles();
-      });
+      if (isPlay) { // isPlay 변수 확인
+        setState(() {
+          offsetX = event.y * 20;
+          offsetY = event.x * 20;
+          moveBlueCircles();
+        });
+      }
     });
     // 파란색 원들의 초기 위치 랜덤하게 설정
     Random random = Random();
@@ -115,31 +118,25 @@ class _MainGameState extends State<MainGame>
         double newY = blueCircleCenterY + dy;
 
         // 화면 범위를 벗어나면 방향을 바꿈
-        if (newX < 20 || newX > MediaQuery
-            .of(context)
-            .size
-            .width - 20) {
+        if (newX < 20 || newX > MediaQuery.of(context).size.width - 20) {
           dx = -dx;
         }
-        if (newY < 20 || newY > MediaQuery
-            .of(context)
-            .size
-            .height - 20) {
+        if (newY < 20 || newY > MediaQuery.of(context).size.height - 20) {
           dy = -dy;
         }
 
-        newX = max(20, min(newX, MediaQuery
-            .of(context)
-            .size
-            .width - 20));
-        newY = max(20, min(newY, MediaQuery
-            .of(context)
-            .size
-            .height - 20));
+        newX = max(20, min(newX, MediaQuery.of(context).size.width - 20));
+        newY = max(20, min(newY, MediaQuery.of(context).size.height - 20));
 
         blueCirclePositions[i] = Offset(newX, newY);
         blueCircleVelocities[i] = Offset(dx, dy);
       }
+    }
+
+    // 초록색 원을 움직이는 로직 추가
+    if (isPlay) {
+      centerX += offsetX;
+      centerY += offsetY;
     }
   }
 
@@ -163,7 +160,8 @@ class _MainGameState extends State<MainGame>
     return Scaffold(
       body: Stack(
         children: [
-          MyTimerWidget(onPlayPauseToggle: isPlay,),
+          const ResetButton(), // 리셋 버튼 추가
+          TimerWidget(onPlayPauseToggle: isPlay,),
           AnimatedBuilder(
             animation: _animation,
             builder: (BuildContext context, Widget? child) {

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-class MyTimerWidget extends StatefulWidget {
+class TimerWidget extends StatefulWidget {
   final bool onPlayPauseToggle;
 
-  const MyTimerWidget({
+  const TimerWidget({
     Key? key,
     required this.onPlayPauseToggle,
   }) : super(key: key);
 
   @override
-  _MyTimerWidgetState createState() => _MyTimerWidgetState();
+  _TimerWidgetState createState() => _TimerWidgetState();
 }
 
-class _MyTimerWidgetState extends State<MyTimerWidget> {
+class _TimerWidgetState extends State<TimerWidget> {
   bool isPlaying = false;
   int secondsElapsed = 0;
   late Timer timer;
